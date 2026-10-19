@@ -170,8 +170,8 @@ window.__ModuleLoader__.load({
       .llmr-trigger:hover,.llmr-trigger[aria-expanded="true"]{background:var(--dsw-alias-interactive-bg-hover,rgba(127,127,127,.14))}
       .llmr-dot{width:8px;height:8px;border-radius:50%;background:var(--dsw-alias-state-business-primary,#2563eb);flex:none}
       .llmr-text{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-      [class*="footerActions"]:has(> .llmr-trigger) { flex-direction: column; align-items: stretch; gap: 2px; }
-      [class*="footerActions"]:has(> .llmr-trigger) > * { width: 100%; }
+      [class*="footerActions"]:has(.llmr-trigger) { flex-direction: column; align-items: stretch; gap: 2px; width: 100%; }
+      [class*="footerActions"]:has(.llmr-trigger) > * { width: 100%; min-width: 0; }
       .llmr-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:16px;background:rgba(0,0,0,.55);backdrop-filter:blur(2px)}
       .llmr-panel{display:flex;flex-direction:column;width:min(1100px,92vw);height:min(760px,88vh);overflow:hidden;border:1px solid #262a33;border-radius:12px;background:#0f1115;color:#e6e6e6;box-shadow:0 24px 64px rgba(0,0,0,.55)}
       .llmr-head{flex:none;display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #262a33;background:#12151b;font:13px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
