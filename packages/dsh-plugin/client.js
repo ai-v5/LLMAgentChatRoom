@@ -51,7 +51,7 @@ window.__ModuleLoader__.load({
             const server = body.server.replace(/\/+$/, '')
             setBootstrap({
               status: 'ready',
-              url: `${server}/login?token=${encodeURIComponent(body.token)}`,
+              url: `${server}/?token=${encodeURIComponent(body.token)}`,
             })
           })
           .catch((error) => {

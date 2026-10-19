@@ -431,6 +431,22 @@ async function kickRoute(
   sendJson(res, 200, { ok: true })
 }
 
+function eventsPrincipal(
+  req: IncomingMessage,
+  ctx: AppContext,
+  roomId: string,
+  url: URL,
+): Principal {
+  const token = url.searchParams.get('token')
+  if (token && !header(req, 'authorization') && !sessionId(req)) {
+    if (!ctx.admin.verify(token)) throw new HttpError(401, 'unauthorized', 'invalid admin token')
+    const member = getOwnerMember(ctx.db, roomId)
+    if (!member) throw new HttpError(403, 'forbidden', 'owner member is missing')
+    return { kind: 'owner', member, via: 'admin', csrf: null }
+  }
+  return resolvePrincipal(req, ctx.db, ctx.admin, roomId)
+}
+
 function openEvents(
   req: IncomingMessage,
   res: ServerResponse,
@@ -438,7 +454,7 @@ function openEvents(
   roomId: string,
   url: URL,
 ): void {
-  const principal = resolvePrincipal(req, ctx.db, ctx.admin, roomId)
+  const principal = eventsPrincipal(req, ctx, roomId, url)
   const rawSince = url.searchParams.get('since') ?? header(req, 'last-event-id') ?? '0'
   const since = Number(rawSince)
   if (!Number.isInteger(since) || since < 0) throw new HttpError(400, 'invalid_request', 'since is invalid')

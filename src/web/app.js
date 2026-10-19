@@ -1,7 +1,9 @@
 const CSRF_KEY = 'llmroom.csrf'
+const TOKEN_KEY = 'llmroom.token'
 
 const state = {
   csrf: '',
+  token: '',
   roomId: null,
   rooms: [],
   members: [],
@@ -72,6 +74,43 @@ function writeStoredCsrf(value) {
   }
 }
 
+function readStoredToken() {
+  try {
+    return sessionStorage.getItem(TOKEN_KEY) ?? ''
+  } catch {
+    return ''
+  }
+}
+
+function writeStoredToken(value) {
+  state.token = value
+  try {
+    if (value) sessionStorage.setItem(TOKEN_KEY, value)
+    else sessionStorage.removeItem(TOKEN_KEY)
+  } catch {
+    // sessionStorage can be unavailable in hardened privacy modes; keep the in-memory copy.
+  }
+}
+
+function tokenFromUrl() {
+  try {
+    return new URLSearchParams(window.location.search).get('token') ?? ''
+  } catch {
+    return ''
+  }
+}
+
+function removeTokenFromUrl() {
+  try {
+    const url = new URL(window.location.href)
+    if (!url.searchParams.has('token')) return
+    url.searchParams.delete('token')
+    history.replaceState(history.state, '', url.pathname + url.search + url.hash)
+  } catch {
+    // Keep the app usable when history is unavailable; the token is already stored.
+  }
+}
+
 function setError(message) {
   const text = message ? String(message) : ''
   dom.error.textContent = text
@@ -104,6 +143,7 @@ async function api(path, options = {}) {
   const method = String(init.method ?? 'GET').toUpperCase()
   const headers = new Headers(init.headers ?? {})
   if (init.body !== undefined) headers.set('Content-Type', 'application/json')
+  if (state.token) headers.set('Authorization', 'Bearer ' + state.token)
   if (csrf && state.csrf && method !== 'GET' && method !== 'HEAD') {
     headers.set('x-csrf-token', state.csrf)
   }
@@ -111,7 +151,7 @@ async function api(path, options = {}) {
     ...init,
     method,
     headers,
-    credentials: 'same-origin',
+    credentials: state.token ? 'omit' : 'same-origin',
   })
   const text = await response.text()
   let payload = null
@@ -160,6 +200,7 @@ function resetSession(message = '') {
   state.seenSeqs = new Set()
   state.invites = new Map()
   writeStoredCsrf('')
+  writeStoredToken('')
   dom.rooms.replaceChildren()
   dom.messages.replaceChildren()
   dom.members.replaceChildren()
@@ -516,7 +557,11 @@ function closeEventSource() {
 
 function openEventSource(roomId, selection) {
   closeEventSource()
-  const source = new EventSource('/api/v1/rooms/' + encodeURIComponent(roomId) + '/events')
+  let eventsUrl = '/api/v1/rooms/' + encodeURIComponent(roomId) + '/events'
+  if (state.token) {
+    eventsUrl += (eventsUrl.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(state.token)
+  }
+  const source = new EventSource(eventsUrl)
   state.eventSource = source
   const current = () => state.eventSource === source && isCurrentRoom(roomId, selection)
 
@@ -560,7 +605,7 @@ async function sendMessage(event) {
   if (!roomId) return
   const text = dom.messageInput.value
   if (!text.trim()) return
-  if (!state.csrf) {
+  if (!state.csrf && !state.token) {
     handleError(new Error('Your CSRF token is missing. Please sign in again.'))
     return
   }
@@ -673,6 +718,18 @@ async function logout() {
 }
 
 async function boot() {
+  const urlToken = tokenFromUrl()
+  if (urlToken) {
+    writeStoredToken(urlToken)
+    removeTokenFromUrl()
+  } else {
+    state.token = readStoredToken()
+  }
+  if (state.token) {
+    showAuthenticated()
+    await loadInitialRooms()
+    return
+  }
   const stored = readStoredCsrf()
   if (!stored) {
     dom.adminToken.focus()
