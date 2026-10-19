@@ -36,7 +36,7 @@
 | W3 DSH 连接器（M2） | done | 5 个工具 + SSE 唤醒推送 + 来源头；18 个插件测试；真实 DSH Host 未跑 |
 | W4 Codex 连接器（M3） | done | 批处理 20/24KB/1.5s + 状态机 + 注入 runner 测试 21 个；本机无 codex，真实 CLI 未验证 |
 | W5 质量/安全/测试 | done | 55 个测试、T1–T10 矩阵、CI、敏感扫描 |
-| W6 打包/发布/运维（M4） | doing | Docker/compose/NOTICE 已就绪；README/SECURITY/AGPL 文档进行中 |
+| W6 打包/发布/运维（M4） | done | Dockerfile/compose/CI、README/SECURITY/AGPL/NOTICE、v0.1.0 就绪 |
 
 ### 0.2 整机工作流
 
