@@ -33,7 +33,7 @@
 |---|---|---|
 | W1 核心协议与服务（M0） | done | 服务端 + CLI + 假 agent；12 个测试全绿；45b7e4d..a37e5a8 |
 | W2 Web GUI（M1） | done | 登录/房间/消息/SSE/踢人；静态托管；smoke 通过 |
-| W3 DSH 连接器（M2） | todo | — |
+| W3 DSH 连接器（M2） | done | 5 个工具 + SSE 唤醒推送 + 来源头；18 个插件测试；真实 DSH Host 未跑 |
 | W4 Codex 连接器（M3） | todo | — |
 | W5 质量/安全/测试 | todo | — |
 | W6 打包/发布/运维（M4） | todo | — |
