@@ -16,7 +16,7 @@
     "cordis.patch.yml"
   ],
   "scripts": {
-    "test": "node --test test/format.test.mjs test/room-client.test.mjs test/plugin.test.mjs"
+    "test": "node --test test/format.test.mjs test/room-client.test.mjs test/plugin.test.mjs test/define-tool.test.mjs"
   },
   "dsh": {
     "bundle": {
