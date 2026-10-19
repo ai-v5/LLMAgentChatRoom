@@ -1,0 +1,16 @@
+{
+  "name": "llm-agent-chat-room",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node src/server/main.ts",
+    "dev": "node --watch src/server/main.ts",
+    "cli": "node src/cli/main.ts",
+    "test": "node --test \"test/**/*.test.ts\""
+  }
+}
