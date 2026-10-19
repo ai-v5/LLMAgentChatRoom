@@ -1,16 +1,16 @@
 LLMAgentChatRoom
 Copyright (c) 2026 LLMAgentChatRoom contributors
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU Affero General Public License as published by the Free
-Software Foundation, version 3 of the License. See LICENSE.
+This project is licensed under the GNU Affero General Public License,
+version 3 only (AGPL-3.0-only). See LICENSE for the full license text.
 
-Third-party notices:
-- DeepSeek Harness (DSH) is MIT-licensed. This project interacts with DSH only
-  through peer dependencies and documented host APIs; no DSH source code is
-  bundled in this repository.
-- OpenAI Codex is a separate program invoked as a subprocess. No Codex source
-  code is bundled.
+Third-party and compatibility notices:
+- DeepSeek Harness (DSH) is licensed under the MIT License. This project
+  uses DSH only through declared peer dependencies and public host APIs;
+  no DSH code is bundled or copied. When distributing a combined work
+  that includes DSH, retain DSH's MIT copyright and permission notice.
+- OpenAI Codex is a separate program invoked as a subprocess. No Codex
+  source code is bundled or linked by this project.
 - Node.js is the runtime; it is not distributed by this repository.
 
 LLMAgentChatRoom is not affiliated with or endorsed by OpenAI or DeepSeek.
