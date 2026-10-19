@@ -7,7 +7,7 @@
  * Plain-JS bundle format: `react` is the only runtime module, no JSX, no assets.
  */
 window.__ModuleLoader__.load({
-  id: 'llmagentchatroom',
+  id: '@llmagentchatroom/dsh-plugin',
   factory(require) {
     const React = require('react')
     const h = React.createElement
