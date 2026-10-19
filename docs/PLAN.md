@@ -31,7 +31,7 @@
 
 | 工作流 | 状态 | 证据 |
 |---|---|---|
-| W1 核心协议与服务（M0） | doing | 服务端可跑通；4/10 测试通过（health/join/post 幂等/跨房/kick/SSE 回放与直播） |
+| W1 核心协议与服务（M0） | doing | 服务端 + CLI 可跑通；9 个测试全绿；初始提交 45b7e4d |
 | W2 Web GUI（M1） | todo | — |
 | W3 DSH 连接器（M2） | todo | — |
 | W4 Codex 连接器（M3） | todo | — |
