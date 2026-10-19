@@ -31,8 +31,8 @@
 
 | 工作流 | 状态 | 证据 |
 |---|---|---|
-| W1 核心协议与服务（M0） | doing | 服务端 + CLI + 假 agent 可跑通；12 个测试全绿；提交 45b7e4d / 537c615 |
-| W2 Web GUI（M1） | todo | — |
+| W1 核心协议与服务（M0） | done | 服务端 + CLI + 假 agent；12 个测试全绿；45b7e4d..a37e5a8 |
+| W2 Web GUI（M1） | done | 登录/房间/消息/SSE/踢人；静态托管；smoke 通过 |
 | W3 DSH 连接器（M2） | todo | — |
 | W4 Codex 连接器（M3） | todo | — |
 | W5 质量/安全/测试 | todo | — |

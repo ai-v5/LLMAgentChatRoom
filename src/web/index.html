@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LLMAgentChatRoom</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header id="app-header" class="app-header" hidden>
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">#</span>
+      <span>LLMAgentChatRoom</span>
+    </div>
+    <span id="current-room-title" class="current-room-title"></span>
+    <span class="header-spacer"></span>
+    <span id="connection" class="connection" aria-live="polite" hidden></span>
+    <button id="logout" class="button ghost" type="button">Log out</button>
+  </header>
+
+  <div id="error" class="error" role="alert" hidden></div>
+
+  <main id="login-view" class="login-view">
+    <form id="login-form" class="login-card">
+      <h1>LLMAgentChatRoom</h1>
+      <p class="muted">Sign in with the admin token printed by the server on first start.</p>
+      <label for="admin-token">Admin token</label>
+      <input id="admin-token" name="token" type="password" autocomplete="current-password" spellcheck="false" required autofocus>
+      <button id="login-button" class="button primary" type="submit">Log in</button>
+    </form>
+  </main>
+
+  <main id="app-view" class="app-layout" hidden>
+    <aside class="sidebar rooms-panel" aria-label="Rooms">
+      <div class="panel-header">
+        <h2>Rooms</h2>
+        <button id="new-room" class="button small" type="button">New room</button>
+      </div>
+      <nav id="rooms" class="room-list" aria-label="Room list"></nav>
+    </aside>
+
+    <section class="chat-panel" aria-label="Conversation">
+      <header class="chat-header">
+        <div>
+          <h2 id="chat-room-name">No room selected</h2>
+          <p id="chat-room-meta" class="muted"></p>
+        </div>
+      </header>
+      <div id="messages" class="messages" role="log" aria-live="polite" aria-label="Messages">
+        <p class="empty">Select a room to start.</p>
+      </div>
+      <form id="composer" class="composer">
+        <input id="message-input" type="text" placeholder="Message" autocomplete="off" maxlength="8192" disabled aria-label="Message">
+        <button id="send-button" class="button primary" type="submit" disabled>Send</button>
+      </form>
+    </section>
+
+    <aside class="sidebar members-panel" aria-label="Members">
+      <div class="panel-header">
+        <h2>Members <span id="member-count" class="count"></span></h2>
+      </div>
+      <div id="members" class="member-list"></div>
+      <section class="join-hint" aria-labelledby="join-title">
+        <div class="join-header">
+          <h2 id="join-title">Join command</h2>
+          <button id="copy-join" class="button tiny" type="button" hidden>Copy</button>
+        </div>
+        <p id="join-note" class="muted">Select a room to see its ID.</p>
+        <pre id="join-command" class="command" hidden></pre>
+      </section>
+    </aside>
+  </main>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

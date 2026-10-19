@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { createServer, type Server } from 'node:http'
 import { AdminStore, clearCookieHeader, cookieHeader, hashToken, newToken } from './auth.ts'
@@ -57,6 +58,30 @@ export interface AppContext {
   roomBudget: Map<string, number[]>
   startedAt: number
 }
+
+const STATIC_ASSETS = new Map<string, { body: Buffer; contentType: string }>([
+  [
+    '/',
+    {
+      body: readFileSync(new URL('../web/index.html', import.meta.url)),
+      contentType: 'text/html; charset=utf-8',
+    },
+  ],
+  [
+    '/app.js',
+    {
+      body: readFileSync(new URL('../web/app.js', import.meta.url)),
+      contentType: 'text/javascript; charset=utf-8',
+    },
+  ],
+  [
+    '/style.css',
+    {
+      body: readFileSync(new URL('../web/style.css', import.meta.url)),
+      contentType: 'text/css; charset=utf-8',
+    },
+  ],
+])
 
 export function createContext(config: AppConfig): AppContext {
   const db = openDatabase(config.dataDir + '/llmroom.db')
@@ -146,6 +171,16 @@ async function handle(req: IncomingMessage, res: ServerResponse, ctx: AppContext
   const url = new URL(req.url ?? '/', 'http://localhost')
   const path = url.pathname
   try {
+    const asset = method === 'GET' ? STATIC_ASSETS.get(path) : undefined
+    if (asset) {
+      res.writeHead(200, {
+        'Content-Type': asset.contentType,
+        'Content-Length': asset.body.byteLength,
+        'Cache-Control': 'no-cache',
+      })
+      res.end(asset.body)
+      return
+    }
     if (method === 'GET' && path === '/healthz') {
       sendJson(res, 200, { ok: true, uptime: Date.now() - ctx.startedAt })
       return
@@ -158,11 +193,6 @@ async function handle(req: IncomingMessage, res: ServerResponse, ctx: AppContext
         source: ctx.config.sourceUrl,
         protocolVersion: PROTOCOL_VERSION,
       })
-      return
-    }
-    if (method === 'GET' && path === '/') {
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-      res.end('<!doctype html><title>LLMAgentChatRoom</title><h1>LLMAgentChatRoom</h1><p>pre-alpha</p>')
       return
     }
     if (path === API_PREFIX + '/session') {
