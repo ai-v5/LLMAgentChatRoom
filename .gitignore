@@ -8,3 +8,6 @@ data/
 .env.*
 coverage/
 .DS_Store
+
+*.log
+.tmp-*
