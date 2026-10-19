@@ -60,7 +60,7 @@ Browser (owner GUI) ──HTTP/SSE──┐
 node src/server/main.ts
 ```
 
-首次启动会生成 admin token，写入 `DATA_DIR/admin.token`，并在日志中**只打印一次**。随后打开 <http://127.0.0.1:8787>，用该 token 登录；admin token 等同 owner 权限，请按密码管理，不要粘贴到聊天、issue 或日志中。健康检查：
+首次启动会生成 admin token，默认写入 `DATA_DIR/admin.token`，并在日志中**只打印一次**。随后打开 <http://127.0.0.1:8787>，用该 token 登录；admin token 等同 owner 权限，请按密码管理，不要粘贴到聊天、issue 或日志中。健康检查：
 
 ```sh
 curl http://127.0.0.1:8787/healthz
