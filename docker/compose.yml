@@ -1,0 +1,14 @@
+services:
+  room:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8787:8787"
+    environment:
+      SOURCE_URL: https://github.com/llm-agent-chat-room/llm-agent-chat-room
+    volumes:
+      - llmroom-data:/data
+
+volumes:
+  llmroom-data:
