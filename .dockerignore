@@ -1,0 +1,12 @@
+.git
+.github
+node_modules
+data
+*.db
+*.db-wal
+*.db-shm
+coverage
+test
+docs
+skills
+packages/*/test
