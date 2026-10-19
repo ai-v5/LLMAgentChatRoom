@@ -12,8 +12,8 @@ window.__ModuleLoader__.load({
     const React = require('react')
     const h = React.createElement
 
-    /** Room GUI origin; the iframe and the "new window" link share it. */
-    const SERVER = 'http://127.0.0.1:8787'
+    /** Host route that returns the room server URL and its owner token. */
+    const BOOTSTRAP_PATH = '/api/llmroom/bootstrap'
     /** Marker attribute for the single injected stylesheet. */
     const STYLE_MARKER = 'data-llmroom-style'
 
@@ -23,13 +23,57 @@ window.__ModuleLoader__.load({
      */
     function RoomButton() {
       const [open, setOpen] = React.useState(false)
+      const [bootstrap, setBootstrap] = React.useState({ status: 'loading' })
+      const [attempt, setAttempt] = React.useState(0)
       const triggerRef = React.useRef(null)
+
+      React.useEffect(() => {
+        const controller = new AbortController()
+        setBootstrap({ status: 'loading' })
+        fetch(BOOTSTRAP_PATH, {
+          signal: controller.signal,
+          headers: { accept: 'application/json' },
+        })
+          .then(async (response) => {
+            let body = null
+            try {
+              body = await response.json()
+            } catch {
+              body = null
+            }
+            if (!response.ok) {
+              const code = body && typeof body.error === 'string' ? body.error : `HTTP ${response.status}`
+              throw new Error(code === 'token_missing' ? '聊天室尚未初始化（缺少 admin token）' : code)
+            }
+            if (!body || typeof body.server !== 'string' || typeof body.token !== 'string') {
+              throw new Error('聊天室连接信息无效')
+            }
+            const server = body.server.replace(/\/+$/, '')
+            setBootstrap({
+              status: 'ready',
+              url: `${server}/login?token=${encodeURIComponent(body.token)}`,
+            })
+          })
+          .catch((error) => {
+            if (controller.signal.aborted) return
+            setBootstrap({
+              status: 'error',
+              message: error instanceof Error ? error.message : String(error),
+            })
+          })
+        return () => { controller.abort() }
+      }, [attempt])
 
       /** Close the overlay and hand focus back to the trigger. */
       const close = React.useCallback(() => {
         setOpen(false)
         const trigger = triggerRef.current
         if (trigger !== null) trigger.focus({ preventScroll: true })
+      }, [])
+
+      const retry = React.useCallback(() => {
+        setBootstrap({ status: 'loading' })
+        setAttempt((value) => value + 1)
       }, [])
 
       React.useEffect(() => {
@@ -46,6 +90,26 @@ window.__ModuleLoader__.load({
       const onBackdropClick = (event) => {
         if (event.target === event.currentTarget) close()
       }
+
+      const loginUrl = bootstrap.status === 'ready' ? bootstrap.url : null
+      const body = bootstrap.status === 'loading'
+        ? h('div', { key: 'loading', className: 'llmr-status', role: 'status' }, '正在启动聊天室…')
+        : bootstrap.status === 'error'
+          ? h('div', { key: 'error', className: 'llmr-status llmr-status-error', role: 'alert' }, [
+            h('p', { key: 'message', className: 'llmr-error' }, `聊天室启动失败：${bootstrap.message}`),
+            h('button', {
+              key: 'retry',
+              type: 'button',
+              className: 'llmr-retry',
+              onClick: retry,
+            }, '重试'),
+          ])
+          : h('iframe', {
+            key: 'frame',
+            className: 'llmr-frame',
+            src: bootstrap.url,
+            title: 'LLMAgentChatRoom',
+          })
 
       return h(React.Fragment, null, [
         h('button', {
@@ -74,13 +138,19 @@ window.__ModuleLoader__.load({
             h('header', { key: 'head', className: 'llmr-head' }, [
               h('span', { key: 'title', className: 'llmr-title' }, 'LLMAgentChatRoom'),
               h('span', { key: 'spacer', className: 'llmr-spacer' }),
-              h('a', {
-                key: 'link',
-                className: 'llmr-link',
-                href: SERVER,
-                target: '_blank',
-                rel: 'noreferrer',
-              }, '新窗口打开'),
+              loginUrl
+                ? h('a', {
+                  key: 'link',
+                  className: 'llmr-link',
+                  href: loginUrl,
+                  target: '_blank',
+                  rel: 'noreferrer',
+                }, '新窗口打开')
+                : h('span', {
+                  key: 'link',
+                  className: 'llmr-link llmr-link-disabled',
+                  'aria-disabled': 'true',
+                }, '新窗口打开'),
               h('button', {
                 key: 'close',
                 type: 'button',
@@ -88,12 +158,7 @@ window.__ModuleLoader__.load({
                 onClick: close,
               }, '关闭'),
             ]),
-            h('iframe', {
-              key: 'frame',
-              className: 'llmr-frame',
-              src: SERVER,
-              title: 'LLMAgentChatRoom',
-            }),
+            h('div', { key: 'body', className: 'llmr-body' }, body),
           ]))
           : null,
       ])
@@ -105,6 +170,8 @@ window.__ModuleLoader__.load({
       .llmr-trigger:hover,.llmr-trigger[aria-expanded="true"]{background:var(--dsw-alias-interactive-bg-hover,rgba(127,127,127,.14))}
       .llmr-dot{width:8px;height:8px;border-radius:50%;background:var(--dsw-alias-state-business-primary,#2563eb);flex:none}
       .llmr-text{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      [class*="footerActions"]:has(> .llmr-trigger) { flex-direction: column; align-items: stretch; gap: 2px; }
+      [class*="footerActions"]:has(> .llmr-trigger) > * { width: 100%; }
       .llmr-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:16px;background:rgba(0,0,0,.55);backdrop-filter:blur(2px)}
       .llmr-panel{display:flex;flex-direction:column;width:min(1100px,92vw);height:min(760px,88vh);overflow:hidden;border:1px solid #262a33;border-radius:12px;background:#0f1115;color:#e6e6e6;box-shadow:0 24px 64px rgba(0,0,0,.55)}
       .llmr-head{flex:none;display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #262a33;background:#12151b;font:13px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
@@ -112,8 +179,15 @@ window.__ModuleLoader__.load({
       .llmr-spacer{flex:1}
       .llmr-link{flex:none;color:#8ab4ff;text-decoration:none;font-size:12px;white-space:nowrap}
       .llmr-link:hover{text-decoration:underline}
+      .llmr-link[aria-disabled="true"],.llmr-link-disabled{color:#6b7280;cursor:default;text-decoration:none}
       .llmr-close{flex:none;padding:4px 12px;border:1px solid #333a46;border-radius:6px;background:#171b22;color:inherit;font:inherit;font-size:12px;cursor:pointer}
       .llmr-close:hover{background:#20252e}
+      .llmr-body{flex:1;display:flex;min-height:0}
+      .llmr-status{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;color:#aab2c0;font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;text-align:center}
+      .llmr-status-error{color:#ffb4b4}
+      .llmr-error{margin:0;max-width:560px;word-break:break-word}
+      .llmr-retry{padding:5px 16px;border:1px solid #4a5568;border-radius:6px;background:#171b22;color:#e6e6e6;font:inherit;font-size:13px;cursor:pointer}
+      .llmr-retry:hover{background:#20252e}
       .llmr-frame{flex:1;display:block;width:100%;min-height:0;border:0;background:#0f1115}
     `
 

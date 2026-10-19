@@ -6,8 +6,10 @@
  * @module @llmagentchatroom/dsh-plugin/plugin
  */
 
+import { spawn } from 'node:child_process'
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
-import { dirname } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { RoomClient, RoomError } from './room-client.js'
 import { authorLabel, formatIncoming, messageKind, shouldWake } from './format.js'
 
@@ -15,8 +17,12 @@ import { authorLabel, formatIncoming, messageKind, shouldWake } from './format.j
 export const PLUGIN_NAME = 'llmagentchatroom'
 
 /** Host services this plugin consumes. */
-export const INJECT = ['tools', 'sessionController', 'sessions']
+export const INJECT = ['tools', 'sessionController', 'sessions', 'connection']
 
+const DEFAULT_SERVER = 'http://127.0.0.1:8787'
+const DEFAULT_DATA_DIR = fileURLToPath(new URL('../../../data', import.meta.url))
+const SERVER_ENTRY = fileURLToPath(new URL('../../../src/server/main.ts', import.meta.url))
+const BOOTSTRAP_PATH = '/api/llmroom/bootstrap'
 const TARGET_LOADED = 'unknown'
 const BACKOFF_INITIAL_MS = 500
 const BACKOFF_MAX_MS = 15_000
@@ -70,14 +76,108 @@ function readConfig(config) {
   const source = config && typeof config === 'object' ? config : {}
   const platform = optionalString(source.platform) ?? 'dsh'
   if (platform.length > 32) throw new Error('dsh-plugin: platform must be at most 32 characters')
+  const dataDir = optionalString(source.dataDir)
   return {
-    server: optionalString(source.server),
+    server: optionalString(source.server) ?? DEFAULT_SERVER,
     room: optionalString(source.room),
     invite: optionalString(source.invite),
     name: optionalString(source.name),
     platform,
-    autoStart: source.autoStart === true,
+    // Starting the local server defaults on; auto-joining still requires an
+    // explicit `autoStart: true` so a plain browser-only install stays idle.
+    autoStart: source.autoStart !== false,
+    autoJoin: source.autoStart === true,
+    dataDir: dataDir ? resolve(dataDir) : DEFAULT_DATA_DIR,
     credentialsFile: optionalString(source.credentialsFile),
+  }
+}
+
+/**
+ * Read the owner token that the room server persists in its data directory.
+ * @param {string} dataDir
+ * @returns {string | null}
+ */
+function readAdminToken(dataDir) {
+  try {
+    const token = readFileSync(join(dataDir, 'admin.token'), 'utf8').trim()
+    return token.length > 0 ? token : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Build the host-fetch response consumed by the client half.
+ * @param {{ server: string, dataDir: string }} settings
+ * @returns {Response}
+ */
+function bootstrapResponse(settings) {
+  const token = readAdminToken(settings.dataDir)
+  if (!token) {
+    return Response.json(
+      { error: 'token_missing' },
+      { status: 503, headers: { 'cache-control': 'no-store' } },
+    )
+  }
+  return Response.json(
+    { server: settings.server, token },
+    { headers: { 'cache-control': 'no-store' } },
+  )
+}
+
+/**
+ * @param {string} server
+ * @returns {string} Local port for the spawned room server.
+ */
+function serverPort(server) {
+  try {
+    return new URL(server).port || '8787'
+  } catch {
+    return '8787'
+  }
+}
+
+/**
+ * @param {string} server
+ * @returns {Promise<boolean>}
+ */
+async function serverHealthy(server) {
+  try {
+    const response = await fetch(server.replace(/\/+$/, '') + '/healthz', {
+      signal: AbortSignal.timeout(1000),
+    })
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Start the local room server when its health endpoint is unavailable.
+ * @param {{ server: string, dataDir: string }} settings
+ * @param {{ warn: (message: string) => void }} log
+ * @returns {Promise<import('node:child_process').ChildProcess | null>}
+ */
+async function startRoomServer(settings, log) {
+  if (await serverHealthy(settings.server)) return null
+  try {
+    const child = spawn(process.execPath, [SERVER_ENTRY], {
+      env: {
+        ...process.env,
+        PORT: serverPort(settings.server),
+        HOST: '127.0.0.1',
+        DATA_DIR: settings.dataDir,
+      },
+      stdio: 'ignore',
+      windowsHide: true,
+    })
+    child.once('error', (error) => {
+      log.warn(`chat-room: failed to start the room server: ${describeError(error)}`)
+    })
+    return child
+  } catch (error) {
+    log.warn(`chat-room: failed to start the room server: ${describeError(error)}`)
+    return null
   }
 }
 
@@ -177,6 +277,41 @@ export function createRoomPlugin(dsh) {
         ctx.logger?.warn(message)
       },
     }
+
+    if (typeof ctx.connection?.fetch?.register === 'function') {
+      ctx.effect(() => {
+        const dispose = ctx.connection.fetch.register({
+          path: BOOTSTRAP_PATH,
+          methods: ['GET'],
+          requestBody: 'buffered',
+          fetch: () => bootstrapResponse(settings),
+        })
+        return () => { void dispose() }
+      }, 'llmagentchatroom: bootstrap route')
+    }
+
+    if (settings.autoStart) {
+      let child = null
+      let stopped = false
+      ctx.effect(() => () => {
+        stopped = true
+        if (child) {
+          child.kill()
+          child = null
+        }
+      }, 'llmagentchatroom: room server')
+      void startRoomServer(settings, log).then((started) => {
+        if (!started) return
+        if (stopped) {
+          started.kill()
+          return
+        }
+        child = started
+      }).catch((error) => {
+        log.warn(`chat-room: failed to start the room server: ${describeError(error)}`)
+      })
+    }
+
     /** @type {Map<string, any>} */
     const bindings = new Map()
     /** @type {Record<string, any>} */
@@ -419,7 +554,7 @@ export function createRoomPlugin(dsh) {
           persistNow()
         }
       }
-      if (!settings.autoStart) {
+      if (!settings.autoJoin) {
         throw new Error('room_not_joined: call room_join first, or enable autoStart with server/room/invite config')
       }
       if (!settings.server || !settings.room || !settings.invite) {
@@ -672,7 +807,7 @@ export function createRoomPlugin(dsh) {
       async execute(args, exec) {
         const sessionId = sessionIdOf(exec)
         let binding = bindings.get(sessionId)
-        if (!binding && settings.autoStart) binding = await ensureBinding(sessionId)
+        if (!binding && settings.autoJoin) binding = await ensureBinding(sessionId)
         if (!binding) {
           return {
             ok: true,

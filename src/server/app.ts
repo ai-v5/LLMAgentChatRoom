@@ -195,6 +195,10 @@ async function handle(req: IncomingMessage, res: ServerResponse, ctx: AppContext
       })
       return
     }
+    if (method === 'GET' && path === '/login') {
+      autoLogin(res, ctx, url)
+      return
+    }
     if (path === API_PREFIX + '/session') {
       if (method === 'POST') return await login(req, res, ctx)
       if (method === 'GET') return await whoami(req, res, ctx)
@@ -232,6 +236,25 @@ async function handle(req: IncomingMessage, res: ServerResponse, ctx: AppContext
     console.error('request failed', requestId(), error)
     sendError(res, 500, 'invalid_request', 'internal error')
   }
+}
+
+function autoLogin(res: ServerResponse, ctx: AppContext, url: URL): void {
+  const token = url.searchParams.get('token') ?? ''
+  if (!ctx.admin.verify(token)) {
+    res.writeHead(403, {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'no-store',
+    })
+    res.end('invalid token')
+    return
+  }
+  const created = ctx.admin.createSession(12 * 60 * 60 * 1000)
+  res.writeHead(303, {
+    Location: '/',
+    'Set-Cookie': cookieHeader(SESSION_COOKIE, created.session, 12 * 60 * 60),
+    'Cache-Control': 'no-store',
+  })
+  res.end()
 }
 
 async function login(req: IncomingMessage, res: ServerResponse, ctx: AppContext): Promise<void> {

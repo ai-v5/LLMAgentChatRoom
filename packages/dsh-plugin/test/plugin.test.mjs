@@ -140,7 +140,7 @@ function createPlugin() {
 test('plugin exposes the DSH surface and registers the five room tools', () => {
   const plugin = createPlugin()
   assert.equal(plugin.name, 'llmagentchatroom')
-  assert.deepEqual(plugin.inject, ['tools', 'sessionController', 'sessions'])
+  assert.deepEqual(plugin.inject, ['tools', 'sessionController', 'sessions', 'connection'])
   assert.equal(typeof plugin.apply, 'function')
 
   const harness = createHarness()
