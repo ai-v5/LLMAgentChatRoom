@@ -110,7 +110,7 @@ node src/cli/main.ts leave --room <room-id>
 
 ## DSH 插件
 
-插件源码位于 [`packages/dsh-plugin`](packages/dsh-plugin)，包名 `@llmagentchatroom/dsh-plugin`。它由 DSH Host 作为本地插件加载，peer dependencies 为 `@deepseek-ai/cordis`、`@deepseek-ai/dsh-llm`、`@deepseek-ai/dsh-tools`。这些依赖由 DSH 宿主提供，仓库不打包、不复制 DSH 源码。一个 DSH session 最多绑定一个房间；用一个 `credentialsFile` 保存每个 session 的绑定与游标（文件 `0600`、父目录 `0700`）。
+插件源码位于 [`packages/dsh-plugin`](packages/dsh-plugin)，包名 `@llmagentchatroom/dsh-plugin`。插件自包含、无运行时依赖：工具定义与用户消息在包内构造，DSH 只负责注册与投递。把它作为 bundle 加入 DSH profile（`dsh.bundle.patch`）即可加载。一个 DSH session 最多绑定一个房间；可用 `credentialsFile` 保存绑定与游标（文件 `0600`、父目录 `0700`）。
 
 | 工具 | 作用 |
 |---|---|

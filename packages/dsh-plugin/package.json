@@ -11,9 +11,9 @@
   "scripts": {
     "test": "node --test test/format.test.mjs test/room-client.test.mjs test/plugin.test.mjs"
   },
-  "peerDependencies": {
-    "@deepseek-ai/cordis": "*",
-    "@deepseek-ai/dsh-llm": "*",
-    "@deepseek-ai/dsh-tools": "*"
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
   }
 }
