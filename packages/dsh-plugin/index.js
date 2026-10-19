@@ -9,11 +9,7 @@
 
 import { randomUUID } from 'node:crypto'
 import { createRoomPlugin } from './src/plugin.js'
-
-/** Pass-through: `ctx.tools.register` accepts this shape directly. */
-function defineTool(definition) {
-  return definition
-}
+import { defineTool } from './src/define-tool.js'
 
 /**
  * Freeze a message and its nested blocks, mirroring DSH's immutable messages.

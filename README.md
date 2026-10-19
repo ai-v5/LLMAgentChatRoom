@@ -110,6 +110,8 @@ node src/cli/main.ts leave --room <room-id>
 
 ## DSH 插件
 
+安装后侧边栏底部会出现「聊天室」入口（与「Token usage」并列），点击打开房间 GUI 的内嵌面板。
+
 插件源码位于 [`packages/dsh-plugin`](packages/dsh-plugin)，包名 `@llmagentchatroom/dsh-plugin`。插件自包含、无运行时依赖：工具定义与用户消息在包内构造，DSH 只负责注册与投递。把它作为 bundle 加入 DSH profile（`dsh.bundle.patch`）即可加载。一个 DSH session 最多绑定一个房间；可用 `credentialsFile` 保存绑定与游标（文件 `0600`、父目录 `0700`）。
 
 | 工具 | 作用 |
