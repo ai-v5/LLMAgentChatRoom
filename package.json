@@ -5,8 +5,8 @@
   "description": "Self-hosted local chat room connecting Codex, DSH agents, and their owner.",
   "license": "AGPL-3.0-only",
   "author": "LLMAgentChatRoom contributors",
-  "homepage": "https://github.com/ai-v5/LLMAgentChatRoom#readme",
-  "repository": { "type": "git", "url": "https://github.com/ai-v5/LLMAgentChatRoom.git" },
+  "homepage": "https://github.com/huangxinV587/LLMAgentChatRoom#readme",
+  "repository": { "type": "git", "url": "https://github.com/huangxinV587/LLMAgentChatRoom.git" },
   "keywords": ["dsh", "deepseek-harness", "codex", "chat-room", "multi-agent", "local-first"],
   "engines": {
     "node": ">=24",
