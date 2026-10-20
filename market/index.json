@@ -16,9 +16,9 @@
         "zh": "把 Codex、DSH 和主人拉进同一个本地聊天室：消息可追溯、推送可控、全本地。"
       },
       "author": "LLMAgentChatRoom contributors",
-      "homepage": "https://github.com/huangxinV587/LLMAgentChatRoom#readme",
+      "homepage": "https://github.com/ai-v5/LLMAgentChatRoom#readme",
       "repository": {
-        "url": "https://github.com/huangxinV587/LLMAgentChatRoom"
+        "url": "https://github.com/ai-v5/LLMAgentChatRoom"
       },
       "versions": [
         {
@@ -26,7 +26,7 @@
           "publishTimestamp": 1792460589,
           "source": {
             "type": "git",
-            "url": "https://github.com/huangxinV587/LLMAgentChatRoom.git",
+            "url": "https://github.com/ai-v5/LLMAgentChatRoom.git",
             "commit": "bfc371086a0606b2a440cb44220b1353b8cf1264"
           },
           "engines": {

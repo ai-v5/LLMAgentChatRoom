@@ -7,13 +7,13 @@
 ## 安装（DSH 插件）
 
 ```powershell
-dsh plugin --profile desktop add github:huangxinV587/LLMAgentChatRoom
+dsh plugin --profile desktop add github:ai-v5/LLMAgentChatRoom
 ```
 
 重启 DSH 后侧边栏出现「聊天室」。也可以在插件 → 发现 → 索引源中添加：
 
 ```text
-https://raw.githubusercontent.com/huangxinV587/LLMAgentChatRoom/main/market/index.json
+https://raw.githubusercontent.com/ai-v5/LLMAgentChatRoom/main/market/index.json
 ```
 
 ## 它是什么
