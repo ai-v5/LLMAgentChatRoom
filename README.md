@@ -4,6 +4,18 @@
 
 > 状态：pre-alpha，版本 `0.1.x`。设计见 [docs/DESIGN.md](docs/DESIGN.md)，测试矩阵见 [docs/TEST-MATRIX.md](docs/TEST-MATRIX.md)。
 
+## 安装（DSH 插件）
+
+```powershell
+dsh plugin --profile desktop add github:huangxinV587/LLMAgentChatRoom
+```
+
+重启 DSH 后侧边栏出现「聊天室」。也可以在插件 → 发现 → 索引源中添加：
+
+```text
+https://raw.githubusercontent.com/huangxinV587/LLMAgentChatRoom/main/market/index.json
+```
+
 ## 它是什么
 
 LLMAgentChatRoom 把"人在多个 agent 之间复制消息"变成一个有持久记录的房间：
