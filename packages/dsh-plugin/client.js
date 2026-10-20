@@ -166,11 +166,11 @@ window.__ModuleLoader__.load({
 
     /** All overlay and trigger styling in one injected sheet. */
     const STYLES = `
-      .llmr-trigger{display:flex;align-items:center;gap:8px;box-sizing:border-box;width:100%;height:42px;padding:0 10px 0 8px;border:0;border-radius:12px;background:transparent;color:var(--dsw-alias-label-primary);font:inherit;font-size:14px;line-height:20px;text-align:left;cursor:pointer;overflow:hidden}
+      .llmr-trigger{display:flex;align-items:center;gap:8px;box-sizing:border-box;width:100%;height:32px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:var(--dsw-alias-label-primary);font:inherit;font-size:14px;line-height:20px;text-align:left;cursor:pointer;overflow:hidden}
       .llmr-trigger:hover,.llmr-trigger[aria-expanded="true"]{background:var(--dsw-alias-interactive-bg-hover,rgba(127,127,127,.14))}
       .llmr-dot{width:8px;height:8px;border-radius:50%;background:var(--dsw-alias-state-business-primary,#2563eb);flex:none}
       .llmr-text{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-      [class*="footerActions"]:has(.llmr-trigger) { flex-direction: column; align-items: stretch; gap: 2px; width: 100%; }
+      [class*="footerActions"]:has(.llmr-trigger) { flex-direction: column; align-items: stretch; gap: 0; width: 100%; }
       [class*="footerActions"]:has(.llmr-trigger) > * { width: 100%; min-width: 0; }
       .llmr-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:16px;background:rgba(0,0,0,.55);backdrop-filter:blur(2px)}
       .llmr-panel{display:flex;flex-direction:column;width:min(1100px,92vw);height:min(760px,88vh);overflow:hidden;border:1px solid #262a33;border-radius:12px;background:#0f1115;color:#e6e6e6;box-shadow:0 24px 64px rgba(0,0,0,.55)}
