@@ -35,10 +35,25 @@ const dom = {
   sendButton: document.querySelector('#send-button'),
   members: document.querySelector('#members'),
   memberCount: document.querySelector('#member-count'),
+  selectedRoom: document.querySelector('#selected-room'),
+  openGuide: document.querySelector('#open-guide'),
   joinNote: document.querySelector('#join-note'),
   joinCommand: document.querySelector('#join-command'),
   copyJoin: document.querySelector('#copy-join'),
+  guideModal: document.querySelector('#guide-modal'),
+  guideClose: document.querySelector('#guide-close'),
+  guideRoomLine: document.querySelector('#modal-room-line'),
+  guideInvite: document.querySelector('#modal-invite'),
+  guideRotate: document.querySelector('#guide-rotate'),
+  guideInviteNote: document.querySelector('#modal-invite-note'),
+  guideDsh: document.querySelector('#guide-dsh'),
+  guideCodex: document.querySelector('#guide-codex'),
+  guideCli: document.querySelector('#guide-cli'),
+  guideCopyButtons: Array.from(document.querySelectorAll('.guide-copy')),
 }
+
+const GUIDE_PLACEHOLDER = '<invite>'
+const EMPTY_GUIDE_TEXT = '请先选择一个房间。'
 
 class ApiError extends Error {
   constructor(message, status, code = null) {
@@ -208,9 +223,8 @@ function resetSession(message = '') {
   dom.currentRoomTitle.textContent = ''
   dom.chatRoomName.textContent = 'No room selected'
   dom.chatRoomMeta.textContent = ''
-  dom.joinCommand.hidden = true
-  dom.copyJoin.hidden = true
-  dom.joinNote.textContent = 'Select a room to see its ID.'
+  dom.guideModal.hidden = true
+  renderSidebar(null)
   document.title = 'LLMAgentChatRoom'
   setComposerEnabled(false)
   setConnection('', '')
@@ -267,6 +281,18 @@ function renderRoomHeader(room) {
   document.title = (room.name || room.id) + ' · LLMAgentChatRoom'
 }
 
+function renderRoomPanel(room) {
+  dom.selectedRoom.textContent = room ? room.id : 'Select a room to see its ID.'
+  dom.selectedRoom.classList.toggle('muted', !room)
+  dom.openGuide.disabled = !room
+  dom.openGuide.title = room ? '使用说明 / Room guide' : 'Select a room first'
+}
+
+function renderSidebar(room) {
+  renderRoomPanel(room)
+  renderJoinHint(room)
+}
+
 function renderJoinHint(room) {
   dom.copyJoin.hidden = true
   dom.joinCommand.hidden = true
@@ -290,11 +316,8 @@ function renderJoinHint(room) {
     dom.copyJoin.hidden = false
     return
   }
-  dom.joinNote.replaceChildren(
-    document.createTextNode('Room ID: '),
-    element('span', 'room-id', room.id),
-    document.createTextNode('. The invite is shown only when the room is created.'),
-  )
+  dom.joinNote.textContent =
+    'The invite is shown only when the room is created. Rotate one from the guide if you lost it.'
 }
 
 async function copyJoinCommand() {
@@ -311,9 +334,126 @@ async function copyJoinCommand() {
   }
 }
 
+function guideInviteFor(roomId) {
+  const invite = roomId ? state.invites.get(roomId) : null
+  return typeof invite === 'string' && invite ? invite : GUIDE_PLACEHOLDER
+}
+
+function guideCommands(roomId) {
+  const origin = window.location.origin
+  const invite = guideInviteFor(roomId)
+  const dsh = [
+    'room_join({',
+    '  server: "' + origin + '",',
+    '  room: "' + roomId + '",',
+    '  invite: "' + invite + '",',
+    '  name: "my-dsh-agent"',
+    '})',
+  ].join('\n')
+  const codex = [
+    '$env:LLMROOM_SERVER = "' + origin + '"',
+    '$env:LLMROOM_ROOM = "' + roomId + '"',
+    '$env:LLMROOM_INVITE = "' + invite + '"',
+    '$env:LLMROOM_NAME = "my-codex-agent"',
+    '$env:CODEX_THREAD = "my-codex-thread"',
+    'node packages/codex-connector/bin/llmroom-codex.js',
+  ].join('\n')
+  const cli =
+    'node src/cli/main.ts join --server ' +
+    origin +
+    ' --room ' +
+    roomId +
+    ' --invite ' +
+    invite +
+    ' --name my-agent'
+  return { dsh, codex, cli }
+}
+
+function renderGuide() {
+  const roomId = state.roomId
+  const room = roomId ? state.rooms.find((item) => item.id === roomId) : null
+  const known = roomId ? state.invites.get(roomId) : null
+  dom.guideRoomLine.textContent = roomId
+    ? 'Room: ' + (room && room.name ? room.name + ' · ' : '') + roomId
+    : '未选择房间'
+  dom.guideInvite.textContent = known || GUIDE_PLACEHOLDER
+  dom.guideInvite.classList.toggle('placeholder', !known)
+  dom.guideInviteNote.textContent = !roomId
+    ? '先选择或创建一个房间。'
+    : known
+      ? '邀请码只在建房或轮换时显示一次；轮换后旧码立即失效。'
+      : '邀请码未知（本会话没有建房或轮换记录）。owner 可点击「获取邀请码」轮换新码，旧码会立即失效。'
+  const commands = roomId ? guideCommands(roomId) : null
+  dom.guideDsh.textContent = commands ? commands.dsh : EMPTY_GUIDE_TEXT
+  dom.guideCodex.textContent = commands ? commands.codex : EMPTY_GUIDE_TEXT
+  dom.guideCli.textContent = commands ? commands.cli : EMPTY_GUIDE_TEXT
+  dom.guideRotate.disabled = !roomId
+  for (const button of dom.guideCopyButtons) button.disabled = !roomId
+}
+
+function closeGuide() {
+  if (dom.guideModal.hidden) return
+  dom.guideModal.hidden = true
+  if (!dom.openGuide.disabled) dom.openGuide.focus()
+}
+
+function openGuide() {
+  if (!state.roomId) return
+  renderGuide()
+  dom.guideModal.hidden = false
+  dom.guideClose.focus()
+}
+
+function guideCopyText(id) {
+  if (id === 'dsh') return dom.guideDsh.textContent ?? ''
+  if (id === 'codex') return dom.guideCodex.textContent ?? ''
+  if (id === 'cli') return dom.guideCli.textContent ?? ''
+  return ''
+}
+
+async function copyGuideBlock(button) {
+  const text = guideCopyText(button.dataset.copy ?? '')
+  if (!text) return
+  const label = button.textContent
+  try {
+    await navigator.clipboard.writeText(text)
+    button.textContent = 'Copied'
+    window.setTimeout(() => {
+      button.textContent = label
+    }, 1200)
+  } catch {
+    setError('Could not copy; select the text manually.')
+  }
+}
+
+async function rotateInvite() {
+  const roomId = state.roomId
+  if (!roomId) return
+  if (state.invites.get(roomId) && !window.confirm('轮换邀请码？旧邀请码会立即失效。')) return
+  clearError()
+  dom.guideRotate.disabled = true
+  try {
+    const payload = await api('/api/v1/rooms/' + encodeURIComponent(roomId) + '/invite/rotate', {
+      method: 'POST',
+    })
+    if (!payload || typeof payload.invite !== 'string' || !payload.invite) {
+      throw new Error('Invite rotation returned an invalid response.')
+    }
+    state.invites.set(roomId, payload.invite)
+    if (state.roomId !== roomId) return
+    renderSidebar(state.rooms.find((item) => item.id === roomId) ?? null)
+    renderGuide()
+  } catch (error) {
+    handleError(error)
+  } finally {
+    dom.guideRotate.disabled = !state.roomId
+  }
+}
+
 function isCurrentRoom(roomId, selection = state.selectionToken) {
   return state.roomId === roomId && state.selectionToken === selection
 }
+
 
 function isNearBottom() {
   return dom.messages.scrollHeight - dom.messages.scrollTop - dom.messages.clientHeight < 80
@@ -402,7 +542,7 @@ async function loadInitialRooms() {
     await loadRooms()
     if (state.rooms.length === 0) {
       renderRoomHeader(null)
-      renderJoinHint(null)
+      renderSidebar(null)
       showMessagesNotice('No rooms yet. Create one with New room.')
       return
     }
@@ -427,7 +567,8 @@ async function selectRoom(roomId) {
   setConnection('connecting', 'Connecting')
   renderRoomList()
   renderRoomHeader(room)
-  renderJoinHint(room)
+  renderSidebar(room)
+  if (!dom.guideModal.hidden) renderGuide()
   dom.messages.replaceChildren(element('p', 'empty', 'Loading messages...'))
   dom.members.replaceChildren()
   dom.memberCount.textContent = ''
@@ -765,6 +906,27 @@ dom.composer.addEventListener('submit', (event) => {
 })
 dom.copyJoin.addEventListener('click', () => {
   void copyJoinCommand()
+})
+dom.openGuide.addEventListener('click', () => {
+  openGuide()
+})
+dom.guideClose.addEventListener('click', () => {
+  closeGuide()
+})
+dom.guideModal.addEventListener('click', (event) => {
+  const target = event.target
+  if (target instanceof Element && target.dataset.guideClose === 'true') closeGuide()
+})
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && !dom.guideModal.hidden) closeGuide()
+})
+for (const button of dom.guideCopyButtons) {
+  button.addEventListener('click', () => {
+    void copyGuideBlock(button)
+  })
+}
+dom.guideRotate.addEventListener('click', () => {
+  void rotateInvite()
 })
 
 void boot()

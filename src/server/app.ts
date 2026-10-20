@@ -75,6 +75,13 @@ const STATIC_ASSETS = new Map<string, { body: Buffer; contentType: string }>([
     },
   ],
   [
+    '/guide.html',
+    {
+      body: readFileSync(new URL('../web/guide.html', import.meta.url)),
+      contentType: 'text/html; charset=utf-8',
+    },
+  ],
+  [
     '/style.css',
     {
       body: readFileSync(new URL('../web/style.css', import.meta.url)),

@@ -639,24 +639,71 @@ input::placeholder {
   color: var(--muted);
 }
 
-.join-hint {
+.room-panel {
   flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   padding: 11px 12px 12px;
   border-top: 1px solid var(--border);
   background: var(--panel);
 }
 
-.join-header {
+.room-panel-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 5px;
+}
+
+.room-panel-head h2 {
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.room-panel-link {
+  color: var(--accent);
+  font-size: 11px;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(110, 168, 254, 0.45);
+}
+
+.room-panel-link:hover {
+  color: #93c5fd;
+}
+
+.room-panel-id {
+  overflow: hidden;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.room-panel-button {
+  width: 100%;
+}
+
+.join-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .join-hint p {
   font-size: 11px;
   overflow-wrap: anywhere;
+}
+
+.join-hint .button {
+  align-self: flex-start;
+}
+
+.join-hint .command {
+  margin-top: 0;
 }
 
 .command {
@@ -674,8 +721,136 @@ input::placeholder {
   overflow-wrap: anywhere;
 }
 
-.room-id {
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 6, 9, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.modal-card {
+  position: relative;
+  z-index: 1;
+  width: min(720px, 100%);
+  max-height: min(86vh, 780px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 20px 20px;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  background: var(--panel);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.55);
+}
+
+.modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-head-text {
+  min-width: 0;
+}
+
+.modal-head h2 {
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.modal-room {
+  margin-top: 4px;
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.modal-invite {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #0d1117;
+}
+
+.modal-label {
+  color: var(--faint);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.modal-invite-value {
+  min-width: 0;
+  color: #c9d2e1;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.modal-invite-value.placeholder {
+  color: var(--warn);
+}
+
+.modal-invite .button {
+  margin-left: auto;
+}
+
+.modal-note {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.modal-body {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.guide-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.guide-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.guide-block-head h3 {
+  margin: 0;
   color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
+.guide-block .command {
+  max-height: 220px;
+  margin: 0;
+  overflow: auto;
 }
 

@@ -60,16 +60,63 @@
         <h2>Members <span id="member-count" class="count"></span></h2>
       </div>
       <div id="members" class="member-list"></div>
-      <section class="join-hint" aria-labelledby="join-title">
-        <div class="join-header">
-          <h2 id="join-title">Join command</h2>
-          <button id="copy-join" class="button tiny" type="button" hidden>Copy</button>
+      <section class="room-panel" aria-labelledby="room-panel-title">
+        <div class="room-panel-head">
+          <h2 id="room-panel-title">Room guide</h2>
+          <a class="room-panel-link" href="/guide.html" target="_blank" rel="noreferrer">原理说明</a>
         </div>
-        <p id="join-note" class="muted">Select a room to see its ID.</p>
-        <pre id="join-command" class="command" hidden></pre>
+        <p id="selected-room" class="room-panel-id muted">Select a room to see its ID.</p>
+        <button id="open-guide" class="button small room-panel-button" type="button" disabled>使用说明 / Room guide</button>
+        <div class="join-hint">
+          <p id="join-note" class="muted"></p>
+          <pre id="join-command" class="command" hidden></pre>
+          <button id="copy-join" class="button tiny" type="button" hidden>Copy join command</button>
+        </div>
       </section>
     </aside>
   </main>
+
+  <div id="guide-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="guide-title" hidden>
+    <div class="modal-backdrop" data-guide-close="true"></div>
+    <div class="modal-card">
+      <header class="modal-head">
+        <div class="modal-head-text">
+          <h2 id="guide-title">使用说明 / Room guide</h2>
+          <p id="modal-room-line" class="modal-room muted">未选择房间</p>
+        </div>
+        <button id="guide-close" class="button ghost small" type="button">关闭</button>
+      </header>
+      <div class="modal-invite">
+        <span class="modal-label">Invite</span>
+        <code id="modal-invite" class="modal-invite-value">—</code>
+        <button id="guide-rotate" class="button tiny" type="button">获取邀请码</button>
+      </div>
+      <p id="modal-invite-note" class="modal-note muted"></p>
+      <div class="modal-body">
+        <section class="guide-block">
+          <div class="guide-block-head">
+            <h3>DSH 插件（工具调用）</h3>
+            <button class="button tiny guide-copy" type="button" data-copy="dsh">Copy</button>
+          </div>
+          <pre id="guide-dsh" class="command"></pre>
+        </section>
+        <section class="guide-block">
+          <div class="guide-block-head">
+            <h3>Codex 连接器（PowerShell）</h3>
+            <button class="button tiny guide-copy" type="button" data-copy="codex">Copy</button>
+          </div>
+          <pre id="guide-codex" class="command"></pre>
+        </section>
+        <section class="guide-block">
+          <div class="guide-block-head">
+            <h3>共享 CLI</h3>
+            <button class="button tiny guide-copy" type="button" data-copy="cli">Copy</button>
+          </div>
+          <pre id="guide-cli" class="command"></pre>
+        </section>
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="/app.js"></script>
 </body>
