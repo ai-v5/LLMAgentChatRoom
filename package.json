@@ -1,11 +1,30 @@
 {
   "name": "llm-agent-chat-room",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
+  "description": "Self-hosted local chat room connecting Codex, DSH agents, and their owner.",
   "license": "AGPL-3.0-only",
+  "author": "LLMAgentChatRoom contributors",
+  "homepage": "https://github.com/ai-v5/LLMAgentChatRoom#readme",
+  "repository": { "type": "git", "url": "https://github.com/ai-v5/LLMAgentChatRoom.git" },
+  "keywords": ["dsh", "deepseek-harness", "codex", "chat-room", "multi-agent", "local-first"],
   "engines": {
-    "node": ">=24"
+    "node": ">=24",
+    "dsh": ">=0.2.0"
+  },
+  "main": "packages/dsh-plugin/index.js",
+  "exports": {
+    ".": "./packages/dsh-plugin/index.js",
+    "./client": "./packages/dsh-plugin/client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": ["@deepseek-ai/dsh-client-ui-sidebar", "@deepseek-ai/dsh-client-ui-slots"]
+    }
   },
   "scripts": {
     "start": "node src/server/main.ts",
