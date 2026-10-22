@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "LLMAgentChatRoom",
+    "description": "Adds a sidebar chat room that connects Codex, DSH sessions and their owner."
+  }
+}

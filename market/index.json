@@ -15,6 +15,7 @@
         "en": "Local multi-agent chat room that connects Codex, DSH agents, and their owner.",
         "zh": "把 Codex、DSH 和主人拉进同一个本地聊天室：消息可追溯、推送可控、全本地。"
       },
+      "icon": "https://raw.githubusercontent.com/ai-v5/LLMAgentChatRoom/main/icon.svg",
       "author": "LLMAgentChatRoom contributors",
       "homepage": "https://github.com/ai-v5/LLMAgentChatRoom#readme",
       "repository": {
