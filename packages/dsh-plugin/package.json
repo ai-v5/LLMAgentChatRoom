@@ -17,18 +17,5 @@
   ],
   "scripts": {
     "test": "node --test test/format.test.mjs test/room-client.test.mjs test/plugin.test.mjs test/define-tool.test.mjs"
-  },
-  "dsh": {
-    "bundle": {
-      "patch": "./cordis.patch.yml"
-    },
-    "client": {
-      "platform": "web",
-      "immediately": true,
-      "inject": [
-        "@deepseek-ai/dsh-client-ui-sidebar",
-        "@deepseek-ai/dsh-client-ui-slots"
-      ]
-    }
   }
 }

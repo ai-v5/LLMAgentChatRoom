@@ -1,13 +1,15 @@
 /**
- * Client half of the `@llmagentchatroom/dsh-plugin` DSH bundle.
+ * Client half of the `llm-agent-chat-room` DSH bundle.
  *
  * Registers the "聊天室" sidebar footer action: a full-width trigger that opens
  * a dimmed overlay with the room GUI (http://127.0.0.1:8787) in an iframe.
  *
+ * The registration id must equal the installed package name — `client-modules`
+ * keys every browser row by it (packages/client/modules/src/index.ts graphRow).
  * Plain-JS bundle format: `react` is the only runtime module, no JSX, no assets.
  */
 window.__ModuleLoader__.load({
-  id: '@llmagentchatroom/dsh-plugin',
+  id: 'llm-agent-chat-room',
   factory(require) {
     const React = require('react')
     const h = React.createElement
