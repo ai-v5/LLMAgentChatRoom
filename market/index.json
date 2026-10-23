@@ -28,7 +28,7 @@
           "source": {
             "type": "git",
             "url": "https://github.com/ai-v5/LLMAgentChatRoom.git",
-            "commit": "54409e4e8620364a765eb8c551e29107edd0c52e"
+            "commit": "61615ad4c7ab2de98816f9146266e5e319bdeb64"
           },
           "engines": {
             "dsh": ">=0.2.0"
